@@ -1,0 +1,232 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[main=czech]{babel}
+\usepackage[nottoc]{tocbibind}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{minted}
+\usepackage{array}
+
+\usepackage{parskip}
+\setlength{\parindent}{20pt}
+
+\title{\textbf{FIT VUT Brno - IMS}\\
+	2. Doprava zboží nebo osob\\
+	Správa vícepatrového skladu}
+\author{Daniel Dolejška, \texttt{xdolej08@stud.fit.vutbr.cz}}
+\date{\today}
+
+\begin{document}
+	
+	\maketitle
+	\tableofcontents
+	
+	
+	\newpage
+	
+	\section{Úvod}
+	% Úvod musí vysvětlit, proč se celá práce dělá a
+	%proč má uživatel výsledků váš dokument číst.
+	%  Motivace a širší souvislosti. Kontext problému.
+	%  V této práci je řešena implementace ..., která bude použita pro
+	%sestavení modelu ...
+	%  Na základě modelu a simulačních experimentů bude ukázáno
+	%chování systému ... v podmínkách ...
+	%  Smyslem experimentů je demonstrovat, že pokud by ..., pak by
+	%...
+	%  Správnost zvolené koncepce byla ověřena...
+	% Psaní úvodů je náročná práce. Úvody se čtou!!!
+	Tato práce se zaobírá modelováním vícepatrového skladu.
+	Klíčovým prvkem tohoto systému je pohyb palet se zbožím mezi jednotlivými patry.
+	
+	Přesun palet mezi patry je možný pouze za pomoci několika vysokozdvižných vozíků, které se ve skladě v průběhu dne pohybují.
+	Pro účely přesunu palet mezi patry je vyhrazen jeden vysokozdvižný vozík.
+	
+	S vozíky má z bezpečnostních důvodů oprávnění pracovat pouze určité procento zaměstnanců.
+	Cílem této práce je zjistit následující:
+	\begin{itemize}
+		\item kolik času je ztraceno v průběhu přesunu palety mezi patry
+		\item průměrné vytížení vozíků přesunem palet mezi patry
+		\item zvýšení efektivity při nahrazení vozíků výtahem
+	\end{itemize}
+
+	\subsection{Zdroje faktů}
+	%1.1 Zdroje faktů
+	% Kdo se na práci podílel jako autor, odborný
+	%konzultant, dodavatel odborných faktů,
+	%  význačné zdroje literatury/fakt, ...
+	%  je ideální, pokud jste vaši koncepci konzultovali s nějakou
+	%autoritou v oboru (v IMS projektu to je hodnoceno, ovšem
+	%není vyžadováno)
+	%  pokud nebudete mít odborného konzultanta, nevadí. Nelze
+	%ovšem tvrdit, že jste celé dílo vymysleli s nulovou interakcí s
+	%okolím a literaturou.
+	% Zdroj údajů
+	Fakta o tomto systému jsou původem z několika zdrojů - prvním je osobní zkušenost a pozorování v době, kdy jsem ve skladě pracoval.
+	Mezi další zdroje informací a faktů pak patří zaměstnanci firmy, pracující na skladě.
+
+
+	\subsection{Ověření validity}
+	%1.2 Ověření validity/funkčnosti
+	% V jakém prostředí a za jakých podmínek
+	%probíhalo experimentální ověřování validity
+	%modelu.
+	% Pokud čtenář/zadavatel vaší zprávy neuvěří ve
+	%validitu vašeho modelu, obvykle vaši práci
+	%odmítne už v tomto okamžiku.
+	% Alternativně lze zmínit v závěru experimentů.
+
+	\newpage
+	\section{Fakta}
+	% Podstatná fakta o systému musí být zdůvodněna a
+	%podepřena důvěryhodným zdrojem (vědecký článek,
+	%kniha, osobní měření a zjišťování). Alespoň jeden (lépe 2)
+	%zdroj.
+	% Fakta:
+	%  Kterékoliv číslo, fakt, stav, vztah.
+	%  Za každým takovým údajem musí následovat odkaz na zdroj (1
+	%důvěryhodný nebo několik jiných).
+	%  Hypotézy/předpoklady (podklady).
+	% SHO: proces příchodů požadavků/doby obsluhy,
+	%struktura systému, ...
+
+	%Věrohodnost faktů
+	% Zdroj literatury — články, normy, tech.
+	%dokumenty.
+	% Osobní/zprostředkované pozorování v terénu
+	%— má však svoje náležitosti (např. měření
+	%stochastického jevu).
+	% Hypotézy — založené na podobném systému.
+	\footnotetext[1]{Zdroj: Osobní měření}
+	\footnotetext[2]{Zdroj: Zaměstnanec firmy}
+	\begin{enumerate}
+		\item Sklad se nachází na třech podlažích \footnotemark[1]
+		\begin{itemize}
+			\item \textsf{Přízemí} - práce s vysokozdvižnými vozíky není nutná
+			\item \textsf{1. a 2. podlaží} - paletu je nutné vždy dostat o patro níže
+		\end{itemize}
+		\item Na každém podlaží se nachází omezené množství prázdných palet \footnotemark[1]
+		\item Ve skladě se aktivně pohybují průměrně 4 vysokozdvižné vozíky \footnotemark[2]
+		\item Ve skladě běžně pracuje průměrně 15 lidí \footnotemark[2]
+		% 6-9hod – 8,
+		% 9-15hod – 20,
+		% 15-18hod – 8
+		\begin{itemize}
+			\item \textsf{75\%} může operovat vysokozdvižný vozík
+			\item \textsf{25\%} musí požádat jiného zaměstnance o přesun palety
+		\end{itemize}
+		\item Za den je průměrně zpracováno (vyskladněno) 410 objednávek \footnotemark[2]
+		\begin{itemize}
+			\item \textsf{75\%} začíná ve 2. patře, následně pokračuje do prvního patra
+			\item \textsf{20\%} začíná v 1. patře, následně pokračuje do přízemí
+			\item \textsf{5\%} pouze z přízemí
+		\end{itemize}
+	\end{enumerate}
+	
+
+	\section{Koncepce}
+	%3. Koncepce modelu/simulátoru
+	%  Konceptuální model je abstrakce reality a redukce reality
+	%na soubor relevantních faktů pro sestavení simulačního
+	%modelu.
+	% Pokud některé partie reality zanedbáváte nebo
+	%zjednodušujete, musí to být zdůvodněno a v
+	%ideálním případě musí být prokázáno, že to
+	%neovlivní validitu modelu.
+	% Výsledek kapitoly: konceptuální (abstraktní)
+	%model s vyznačením relevantních faktů.
+	% Základní koncept modelu.
+
+	%Fakta versus Koncepce
+	% Fakta: soupis znalostí o daném problému.
+	% Koncepce:
+	%  převzetí faktů do modelu,
+	%  zdůvodněné provedené zjednodušení faktů,
+	%  abstraktní popis modelu/programu.
+	% Těžiště modelářské práce. Vytváříme abstraktní
+	%model.
+	% Návod: koncepci vaší práce MUSÍ pochopit
+	%libovolný technik (a často i manažer...).
+
+	%Koncepce SHO: Petriho síť
+	% Může být dobré ukázat vztahy mezi procesy a
+	%zdroji v systému.
+	%  Neberme AM v Petriho síti jako detailní program.
+	%AM má ukázat zásadní fakta o systému. Části, které v PS
+	%nelze vyjádřit, vyjádřete slovním popisem.
+	%  Konkrétní fronta se volí podle.... Vygeneruje se normal(X,Y)
+	%značek...
+	% AM musí být stručný, přehledný a srozumitelný
+	%Může být čitelně psán rukou + scan.
+
+	%Zjišťování faktů
+	% Náročná práce, mnohdy téměř partyzánská.
+	% Literatura.
+	% Osobní (nedestruktivní) zjišťování v terénu.
+	% Je to součást modelářské práce.
+
+	\section{Způsob řešení}
+
+	\section{Experimenty}
+	%Simulační studie začíná formulováním problému:
+	%  co chci zjistit,
+	%  (proč je k tomu potřeba simulační model.)
+	% Studie končí výslovením závěru:
+	%  co jsem tedy zjistil,
+	%  co bych ještě mohl zjistit,
+	%  (proč by to nešlo bez modelu.)
+	%  Bez experimentů práce nedává smysl!
+
+	%Experimenty: úvod
+	% Experimentování musí mít předem zvolený a zdůvodněný
+	%řád, či postup.
+	% Okolnosti experimentování:
+	%  datová sada, konfigurace měřící aparatury, …
+	%  závislost Y na X (graf).
+	% Test versus Experiment.
+	%  “měření” != experiment !!!
+	% Experimenty se i ladí model - kalibrační experimenty.
+	%  ... na základě tohoto experimentu jsme korigovali parametr x..
+	%  u praktických simulačních studií se nepublikuje.
+	%Struktura kapitoly Experimenty
+	% 5.1 Postup experimentování a okolnosti studie
+	% 5.2 Dokumentace jednotlivých experimentů
+	% 5.3 Závěr experimentů
+	% Poznámka: experimentování je činnost
+	%vyžadující preciznost.
+	%  modelování a SIMULACE
+	%Dokumentace experimentu
+	% Protokolární forma:
+	%  vstupy a okolnosti,
+	%  výstupy a pozorování,
+	%  interpretace výsledků.
+	% Interpretace výsledků:
+	%  Rozbor výsledků: co v nich má čtenář vidět.
+	%  Grafy mají pojmenované a kalibrované osy.
+	% Návrh dalšího experimentu.
+	%Závěry experimentů
+	% Co bylo experimentováním zjištěno.
+	% Jaké chyby v modelu byly odstraněny (oproti
+	%původním předpokladům ... došlo ke změně
+	%koncepce ... protože ...).
+	% Co lze zjistit dalšími experimenty.
+
+	\section{Závěr}
+	%Jednoznačná odpověď na prvotní otázku studie.
+	%  Studií provedenou na našem modelu bylo jednoznačně
+	%prokázáno/vyvráceno, že ...
+	%  V rámci experimentů bylo zjištěno, že průměrné zatížení ...
+	%je ...
+	%  Z experimentů vyplývá jednoznačné doporučení, aby
+	%provozovatel ... rozšířil výrobu o ...
+	%  Ze statisticky zpracovaného měření v terénu plyne, že proces
+	%příchodů ... se řídí normálním rozložením se středem a ....
+	%  Na přiložených demo-příkladech jsme ověřili funkčnost ...
+
+	
+	\newpage
+	\bibliographystyle{plain}
+	\bibliography{zdroje}
+	
+\end{document}

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(src)
 set(SIMLIB_SOURCE
-        src/simlib/_test_.cc
+        #       src/simlib/_test_.cc
         src/simlib/algloop.cc
         src/simlib/atexit.cc
         src/simlib/barrier.cc
@@ -76,9 +76,13 @@ set(SIMLIB_SOURCE
         src/simlib/zdelay.h
         )
 
+add_library(simlib SHARED ${SIMLIB_SOURCE})
+
 include_directories(src/ims2018)
 set(SOURCES
         src/ims2018/main.cpp
+        src/ims2018/Sklad.cpp src/ims2018/Sklad.h
         )
 
-add_executable(ims2018 ${SOURCES} ${SIMLIB_SOURCES})
+add_executable(ims2018 ${SOURCES})
+target_link_libraries(ims2018 simlib)
