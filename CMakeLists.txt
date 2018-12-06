@@ -81,8 +81,7 @@ add_library(simlib SHARED ${SIMLIB_SOURCE})
 include_directories(src/ims2018)
 set(SOURCES
         src/ims2018/main.cpp
-        src/ims2018/Sklad.cpp src/ims2018/Sklad.h
-        )
+        src/ims2018/InputParser.cpp src/ims2018/InputParser.h)
 
 add_executable(ims2018 ${SOURCES})
 target_link_libraries(ims2018 simlib)
