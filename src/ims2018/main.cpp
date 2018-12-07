@@ -35,7 +35,6 @@ Histogram vychystaneZakazky("Pocty zpracovanych zakazek [n/hod]", 0, 1.f, WORKDA
 Histogram prestavky("Pocet prestavek [n/hod]", 0, 1.f, WORKDAY / HOUR);
 Histogram presunyPalet("Presuny palet [min]", 0, 1.f, 15);
 Histogram casyZakazek("Casy zakazek [min]", 0, 5.f, 12);
-Histogram casyZakazekAlt("Casy zakazek (ALT) [min]", 0, 5.f, 12);
 
 Stat vychystavani_patro2("Casy zakazek - 2. patro [min]");
 Stat vychystavani_patro1("Casy zakazek - 1. patro [min]");
@@ -43,6 +42,8 @@ Stat vychystavani_patro0("Casy zakazek - prizemi [min]");
 
 bool SIM_vytah = false;
 double zacatekDne = 0;
+int pracovniku_celkem = 0;
+int zakazek_celkem = 0;
 
 class Pracovnik : public Process
 {
@@ -207,6 +208,7 @@ class Pracovnik : public Process
 			}
 
 			///	PR-P0-H
+			zakazek_celkem++;
 			vychystaneZakazky((Time - zacatekDne) / float(HOUR));
 			casyZakazek((Time - zacatekZakazky) / float(MINUTE));
 			presunyPalet(casPresunu / float(MINUTE));
@@ -279,6 +281,7 @@ int main(int argc, char **argv)
 
 	auto pracovniku_dopoledne = 12;
 	if (input->cmdOptionExists("--prac-dopol")) pracovniku_rano = std::stoi(input->getCmdOption("--prac-dopol"));
+	pracovniku_celkem+= pracovniku_rano + pracovniku_dopoledne;
 
 	auto dni = 261;
 	if (input->cmdOptionExists("--dni")) dni = std::stoi(input->getCmdOption("--dni"));
@@ -288,7 +291,7 @@ int main(int argc, char **argv)
 	//	INICIALIZACE SIMLIB
 	//================================================================dd==
 	//SetOutput("vysledky");
-	Init(0, dni * (WORKDAY + 10 * HOUR));
+	Init(0, dni * 24 * HOUR);
 
 
 	//================================================================dd==
@@ -320,20 +323,22 @@ int main(int argc, char **argv)
 	Print("\n================================================================dd==\n");
 	Print("\t\tZakazky - statistiky v patrech\n");
 	vychystavani_patro2.Output();
-	patro2.Output();
+	//patro2.Output();
 	vychystavani_patro1.Output();
-	patro1.Output();
+	//patro1.Output();
 	vychystavani_patro0.Output();
-	patro0.Output();
+	//patro0.Output();
 
 	Print("\n================================================================dd==\n");
 	Print("\t\tZakazky komplet - agregace\n");
 	vychystaneZakazky.Output();
 	casyZakazek.Output();
-	casyZakazekAlt.Output();
 	prestavky.Output();
 
+	Print("Celkovy pocet zakazek: %d\n", zakazek_celkem);
+	Print("Prumerny pocet zakazek na jednoho zamestance: %f\n", float(zakazek_celkem) / float(pracovniku_celkem));
 	Print("\n");
+
 	SIMLIB_statistics.Output();
 
 	return 0;
