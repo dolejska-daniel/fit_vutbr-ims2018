@@ -5,7 +5,7 @@
 /// @author Daniel Dolejška <xdolej08@stud.fit.vutbr.cz>
 ///
 #include <functional>
-#include "simlib/simlib.h"
+#include "../simlib/simlib.h"
 #include "InputParser.h"
 
 #define SECOND	1
@@ -75,7 +75,7 @@ class Pracovnik : public Process
 				///	P2-VO-NH
 				Wait(Uniform(30 * SECOND, 2 * MINUTE)); ///	P2-VO-H
 			}
-			else; ///	P2-VO-OK
+			///	P2-VO-OK
 
 			///	PR-P21-VS
 			Seize(vozik); ///	P2-VO
@@ -107,7 +107,8 @@ class Pracovnik : public Process
 			{
 				///	P1-VO-NH
 				Wait(Uniform(30 * SECOND, 2 * MINUTE)); ///	P1-VO-H
-			} else; ///	P1-VO-OK
+			}
+			///	P1-VO-OK
 
 			///	PR-P10-VS
 			Seize(vozik); ///	P1-VO
@@ -258,8 +259,8 @@ class Prichod : public Event
 
 public:
 	explicit Prichod(int pocetPracovniku):
-		_pocetPracovniku(pocetPracovniku),
-		_casSpusteni(Time)
+		_casSpusteni(Time),
+		_pocetPracovniku(pocetPracovniku)
 	{
 		Activate();
 	}
@@ -335,6 +336,7 @@ int main(int argc, char **argv)
 	casyZakazek.Output();
 	prestavky.Output();
 
+	Print("Simulovan beh skladu po %d dni.\n", int(Time / (24 * HOUR)));
 	Print("Celkovy pocet zakazek: %d\n", zakazek_celkem);
 	Print("Prumerny pocet zakazek na jednoho zamestance: %f\n", float(zakazek_celkem) / float(pracovniku_celkem));
 	Print("\n");
