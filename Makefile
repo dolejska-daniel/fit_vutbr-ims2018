@@ -29,7 +29,7 @@ main.o:
 
 
 clean:
-	rm *.o *.od $(COUT) -f -v 2>/dev/null
+	rm *.o *.od *.tar.gz $(COUT) -f -v 2>/dev/null
 
 pack:
-	tar -cvf xdolej08.tar src/ims2018/* src/simlib/simlib.h doc/manual.tex doc/zdroje.bib doc/manual.pdf Makefile
+	tar -czvf 2_xdolej08.tar.gz src/ims2018/* src/simlib/simlib.h doc/manual.pdf Makefile
